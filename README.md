@@ -7,8 +7,8 @@ evaluation with the new ES6 default parameters, it can!
 
 Note
 ----
-This package does not work with older versions of node. It has been tested
-in node/6.2.0.
+This package does not work with older versions of node. You will need
+node/6.0.0 or greater.
 
 Usage examples
 --------------
