@@ -1,3 +1,5 @@
+'use strict';
+
 let getArgs = require('./get-args');
 
 class Container {
