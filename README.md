@@ -94,7 +94,7 @@ b.extend(a);
 //    If you were to change apiUrl in container b,
 //    this would not affect the construction of a
 //    MyClass-instance as the containers simply
-//    query for values prom the containers they
+//    query for values from the containers they
 //    extend (through Codependent.prototype.get) if
 //    they don't contain a given value.
 
