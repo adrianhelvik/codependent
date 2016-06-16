@@ -214,7 +214,7 @@ into a class
 ------------
 
 ```javascript
-container.instantiatedClass(class {
+container.instantiateClass(class {
     constructor(x = injected, injectedAsWell) {
         // ...
     }
@@ -251,3 +251,31 @@ get-args
 * Refactor get-args into separate npm-module.
 * Replace regex with state machine.
 
+Upcoming changes
+================
+
+What will change
+----------------
+
+For v3 I plan on changing the API slightly.
+
+* The provider function will be called every time a provider is injected
+    * So that a provider does what the name indicates
+
+* Values will be created with a function. They will replace the existing providers.
+    * The arrow function syntax is short and sweet, so why not?
+    * Injection will be possible
+    * Example: `container.value('meaningOfLife', () => 42);`
+
+What may change
+---------------
+
+* Contant may replace the current value syntax
+    * Example: `container.constant('meaningOfLife', 42);`
+
+* The method callFunction is verbose may be renamed
+    * Possible replacement: fn
+    * Example: `container.fn((x = myInjectable) => { /* ... */ })`
+
+* The method instantiateClass is also verbose
+    * Possible replacement: instantiate or create (not sure yet)
