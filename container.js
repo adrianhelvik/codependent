@@ -21,9 +21,16 @@ class Container {
 
     /**
      * Add a singleton instance of a class to the container.
+     *
+     * @param {string} key   The name of the new injectable.
+     * @param {class}  clazz The class to be instantiated and added to the container.
+     *
+     * @return {Container} This container.
      */
     singleton(key, clazz) {
-        return this.values[key] = this.instantiateClass(clazz);
+        this.values[key] = this.instantiateClass(clazz);
+
+        return this;
     }
 
     /**
@@ -90,7 +97,7 @@ class Container {
             args.push('argValues['+i+']');
         }
 
-        return eval('new clazz(' + args.join(',') + ');')
+        return eval('new clazz(' + args.join(',') + ');');
     }
 
     /**
@@ -116,7 +123,7 @@ class Container {
 
     _getInjectables(fn) {
         let originalArgs = getArgs.defaults(fn);
-        let argValues = []
+        let argValues = [];
 
         for (let key of Object.keys(originalArgs)) {
             if (originalArgs[key]) {
