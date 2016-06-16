@@ -3,8 +3,10 @@ Codependent - A dandy dependency injector
 
 We all know about angular style dependency injection. It is nice and sweet,
 but what if it could be even better? Due to the lazy loading of parameter
-evaluation with the new ES6 default parameters, I hereby present to you
-some sweet *Syntactic sugar*!
+evaluation with the new ES6 default parameters,
+
+Usage examples
+--------------
 
 ```javascript
 // For classes
