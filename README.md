@@ -5,6 +5,11 @@ We all know about angular style dependency injection. It is nice and sweet,
 but what if it could be even better? Due to the lazy loading nature of argument
 evaluation with the new ES6 default parameters, it can!
 
+Note
+----
+This package does not work with older versions of node. It has been tested
+in node/6.2.0.
+
 Usage examples
 --------------
 
