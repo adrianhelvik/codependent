@@ -32,7 +32,6 @@ describe('get-args', () => {
             assert.deepEqual(getArgs(fn), ['response']);
         });
 
-
         it('gets default arguments of arrow functions starting with class', () => {
             class Router {
                 get(x, fn) {
@@ -115,6 +114,15 @@ describe('get-args', () => {
 
             assert.deepEqual(getArgs(fn), ['x', 'y', 'z', 'w']);
             assert.deepEqual(getArgs.defaults(fn), { x: "'/*'", y: "'*/'", z: "'//'", w: undefined})
+        });
+
+        it('gets default arguments of es6 style object method', () => {
+            let obj = {
+                fn/*(*/(a=/**/b,c=d) {}
+            };
+
+            assert.deepEqual(getArgs(obj.fn), ['a', 'c']);
+            assert.deepEqual(getArgs.defaults(obj.fn), {'a': 'b', 'c': 'd'} );
         });
     });
 

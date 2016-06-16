@@ -244,6 +244,5 @@ get-args
 --------
 
 * Refactor get-args into separate npm-module.
-* Test object method shorthand - as in { x() {} }
-* Replace regex with state machine or es6 parser.
+* Replace regex with state machine.
 
