@@ -3,9 +3,8 @@ Codependent - A dandy dependency injector
 
 We all know about angular style dependency injection. It is nice and sweet,
 but what if it could be even better? Due to the lazy loading of parameter
-evaluation with the new ES6 default parameters, I hereby present to you...
-
-*Syntactic sugar*
+evaluation with the new ES6 default parameters, I hereby present to you
+some sweet *Syntactic sugar*!
 
 ```javascript
 // For classes
@@ -22,7 +21,7 @@ function myFunc(something = somethingElse) {
 let myFunc = thisIsInjected => {
 }
 
-let myFunc = (something = injectedValue) {
+let myFunc = (something = injectedValue) => {
 }
 ```
 
