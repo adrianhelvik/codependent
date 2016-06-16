@@ -148,7 +148,7 @@ describe('get-args', () => {
                 /* ({[{( */
                 someMethod() {
                 }
-                constructor(a /* Ignore me,
+                /**/constructor(a /* Ignore me,
                                  I should be removed*/
                             =  /* .. and me */
                             b, /* and me

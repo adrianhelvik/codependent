@@ -88,14 +88,16 @@ function splitArgs(fnStr) {
 
     let tokens = fnStr.match(jsTokens);
 
+    // enable x => {} style arrow function args parsing
     for (let i = 0; i < tokens.length; i++) {
         let token = tokens[i];
 
         if (token === '(') {
-            break;
+            break; // An argument list has been found for arrow fn or object method - as in { x() {} }
         }
         if (token === '=>') {
-            for (let j = 0; j < i; j++) {
+            // find a non-whitespace token before the => token
+            for (let j = i-1; j >= 0; j--) {
                 if (! /^\s*$/.test(tokens[j])) {
                     return [tokens[j]];
                 }
