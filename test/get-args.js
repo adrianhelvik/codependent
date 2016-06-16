@@ -114,6 +114,7 @@ describe('get-args', () => {
             }
 
             assert.deepEqual(getArgs(fn), ['x', 'y', 'z', 'w']);
+            assert.deepEqual(getArgs.defaults(fn), { x: "'/*'", y: "'*/'", z: "'//'", w: undefined})
         });
     });
 
