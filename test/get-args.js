@@ -107,6 +107,14 @@ describe('get-args', () => {
                 assert.deepEqual(getArgs.defaults(fn), {'a': undefined});
             });
         });
+
+        it('wont parse comments within strings', () => {
+            function fn(x = '/*', y = '*/', z = '//', w) {
+                // ...
+            }
+
+            assert.deepEqual(getArgs(fn), ['x', 'y', 'z', 'w']);
+        });
     });
 
     describe('class', () => {
