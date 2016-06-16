@@ -237,3 +237,13 @@ Send me a pull request and I will get it sorted out! Tests are mandatory for pul
 The get-args function has tests and is working, but it is ugly and probably has suboptimal
 performance, so I would be happy about pull requests for that one! :)
 
+TODO
+====
+
+get-args
+--------
+
+* Refactor get-args into separate npm-module.
+* Strip out comments from argument list.
+* Replace regex with state machine or es6 parser.
+

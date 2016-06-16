@@ -53,6 +53,60 @@ describe('get-args', () => {
 
             assert.deepEqual(getArgs(fn), ['classyLady']);
         });
+
+        describe('can handle single line comments', () => {
+            it('in regular functions', () => {
+                function myFn(a // Ignore me
+                                  = // .. and me
+                                      b, // and me
+                              c // aaand me
+                                  = // aaaand me
+                                      d // aaaaand me
+                             ) {
+                }
+
+                assert.deepEqual(getArgs(myFn), ['a', 'c']);
+                assert.deepEqual(getArgs.defaults(myFn), {'a': 'b', 'c': 'd'} );
+            });
+
+            it('in arrow functions with parens', () => {
+                function myFn(a // Ignore me
+                              = // .. and me
+                                  b, // and me
+                          c // aaand me
+                              = // aaaand me
+                                  d // aaaaand me
+                             ) {
+                }
+
+                assert.deepEqual(getArgs(myFn), ['a', 'c']);
+                assert.deepEqual(getArgs.defaults(myFn), {'a': 'b', 'c': 'd'} );
+            });
+        });
+
+        describe('can handle multiline comments', () => {
+            it('in regular functions,', () => {
+                function /* ({[ */ fn /* ({[ */ ( /* ([{ */ a /* = */ = /**/ 10 ) {
+                }
+
+                assert.deepEqual(getArgs(fn), ['a']);
+                assert.deepEqual(getArgs.defaults(fn), {'a': '10'});
+            });
+            it('in arrow functions with parens', () => {
+                let fn = /* => { */ (a /* ({[// */ = 10) => {
+                }
+
+                assert.deepEqual(getArgs(fn), ['a']);
+                assert.deepEqual(getArgs.defaults(fn), {'a': '10'});
+            });
+            it('in arrow functions without parens', () => {
+                let fn = /* => { */ a /* ({[// */ => {
+                }
+
+                assert.deepEqual(getArgs(fn), ['a']);
+                assert.deepEqual(getArgs.defaults(fn), {'a': undefined});
+            });
+        });
     });
 
     describe('class', () => {
@@ -67,6 +121,62 @@ describe('get-args', () => {
 
             assert.deepEqual(getArgs(MyClass), ['a', 'c']);
             assert.deepEqual(getArgs.defaults(MyClass), {'a': 'b', 'c': 'd'} );
+        });
+
+        it('can handle single line comments', () => {
+            class MyClass {
+                // ({[{(
+                someMethod() {
+                }
+
+                constructor(a // Ignore me
+                            = // .. and me
+                            b, // and me
+                            c // aaand me
+                            = // aaaand me
+                            d // aaaaand me
+                           ) {
+                }
+            }
+
+            assert.deepEqual(getArgs(MyClass), ['a', 'c']);
+            assert.deepEqual(getArgs.defaults(MyClass), {'a': 'b', 'c': 'd'} );
+        });
+
+        it('can handle multi line comments', () => {
+            class MyClass {
+                /* ({[{( */
+                someMethod() {
+                }
+                constructor(a /* Ignore me,
+                                 I should be removed*/
+                            =  /* .. and me */
+                            b, /* and me
+                                  */
+                            c /* aaand me */
+                            = /* aaaand me */
+                            d /* aaaaand me */
+                           ) {
+                }
+            }
+
+            assert.deepEqual(getArgs(MyClass), ['a', 'c']);
+            assert.deepEqual(getArgs.defaults(MyClass), {'a': 'b', 'c': 'd'} );
+        });
+
+        it ('won\'t parse comments within strings', () => {
+            class MyClass {
+                someMethod() {
+                }
+
+                constructor(a = "/* Do not ignore",
+                            c = '// We don\'t like being ignored */'
+                           ) {
+                }
+            }
+
+            assert.deepEqual(getArgs(MyClass), ['a', 'c']);
+            assert.deepEqual(getArgs.defaults(MyClass), {'a': '"/* Do not ignore"', 'c': "'// We don\\'t like being ignored */'"} );
         });
     });
 });

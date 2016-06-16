@@ -13,10 +13,54 @@ function getArgs(fn) {
 }
 
 function getArgsDefaults(fn) {
-    let split = splitArgs(fn.toString());
+    let noComment = removeComments(fn.toString());
+    let split = splitArgs(noComment);
     let mapped = mapArgsToDefault(split);
 
     return mapped;
+}
+
+function removeComments(fnStr) {
+    let res = [];
+
+    main: for (let i = 0; i < fnStr.length; i++) {
+        if (fnStr[i] === '\'') {
+            res.push(fnStr[i]);
+            i++;
+            while (fnStr[i] !== '\'' || fnStr[i-1] === '\\') {
+                res.push(fnStr[i]);
+                i++;
+            }
+        }
+        if (fnStr[i] === '"') {
+            res.push(fnStr[i]);
+            i++;
+            while (fnStr[i] !== '"' || fnStr[i-1] === '\\') {
+                res.push(fnStr[i]);
+                i++;
+            }
+        }
+        if (fnStr.substring(i, i+2) === '//') {
+            i += 2;
+            while (! ['\n', '\l', '\r'].includes(fnStr[i])) {
+                i++;
+            }
+        }
+
+        if (fnStr.substring(i, i+2) === '/*') {
+            let start = i;
+            i += 2;
+            while (fnStr.substring(i, i+2) !== '*/') {
+                i++;
+            }
+            i += 2;
+            let end = i;
+        }
+
+        res.push(fnStr[i]);
+    }
+
+    return res.join('');
 }
 
 function mapArgsToDefault(arr) {
