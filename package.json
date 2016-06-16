@@ -1,0 +1,21 @@
+{
+  "name": "codependent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "container.js",
+  "repository": {
+      "type" : "git",
+      "url" : "https://github.com/adrianhelvik/codependent"
+  },
+  "directories": {
+      "test": "test"
+  },
+  "scripts": {
+      "test": "mocha"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+      "js-tokens": "^1.0.3"
+  }
+}
