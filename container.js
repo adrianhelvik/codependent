@@ -132,14 +132,7 @@ class Container {
      * @returns {object} The created instance of the class.
      */
     instantiate(clazz) {
-        const argValues = this._getInjectables(clazz);
-        const args = [];
-
-        for (let i = 0; i < argValues.length; i++) {
-            args.push('argValues[' + i + ']');
-        }
-
-        return eval('new clazz(' + args.join(',') + ');');
+        return Reflect.construct(clazz, this._getInjectables(clazz));
     }
 
     /**
