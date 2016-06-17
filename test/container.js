@@ -4,177 +4,336 @@ var assert = require('assert');
 var Container = require('../container');
 
 describe('container', () => {
-    it('can set/get a value', () => {
-        var container = new Container('set/get value test');
 
-        container.value('hello', 'world');
-        assert.equal(container.get('hello'), 'world');
+    describe('.constant', () => {
+
+        it('can be registered and taken out', () => {
+
+            // Arrange...
+            var container = new Container('container');
+
+            // Act...
+            container.constant('hello', 'world');
+
+            // Assert...
+            assert.equal(container.get('hello'), 'world');
+
+        });
+
     });
 
-    it('can set/get a class', () => {
-        var container = new Container('set/get class test');
+    describe('.register', () => {
 
-        class MyClass {}
+        it('can be registered and taken out', () => {
 
-        container.class('MyClass', MyClass);
+            // Arrange...
+            const container = new Container('container');
 
-        var instance1 = container.get('MyClass');
-        var instance2 = container.get('MyClass');
+            // Act...
+            container.register('hello', () => 'world');
 
-        assert.ok(instance1 instanceof MyClass);
-        assert.ok(instance2 instanceof MyClass);
-        assert.ok(instance1 !== instance2);
+            // Assert...
+            assert.equal(container.get('hello'), 'world');
+        });
+
+        it('can be dependency injected into', () => {
+            // Arrage
+            const container = new Container('container');
+
+            // Act
+            container.constant('foo', 'bar');
+            container.register('hello', (foo) => foo + ' world');
+
+            // Assert
+            assert.equal(container.get('hello'), 'bar world');
+        });
+
     });
 
-    it('can dependency inject into class constructor', () => {
-        var container = new Container('inject class test');
-        class ClassA {}
-        container.class('ClassA', ClassA);
+    describe('.provider', () => {
 
-        class ClassB {
-            constructor(a = ClassA) {
-                this.a = a;
+        it('can be registered and taken out', () => {
+
+            // Arrange...
+            var container = new Container('container');
+            let id = 0;
+            container.provider('incrementing', () => {
+                return id++;
+            });
+
+            // Act / assert...
+            container.callFunction((incrementing) => {
+                assert.equal(incrementing, 0);
+            });
+            container.callFunction((incrementing) => {
+                assert.equal(incrementing, 1);
+            });
+        });
+
+    });
+
+    describe('.class', () => {
+
+        it('is instantiated once for every injection', () => {
+
+            // Arrange...
+            var container = new Container('set/get class test');
+            class MyClass {}
+
+            // Act...
+            container.class('MyClass', MyClass);
+            var instance1 = container.get('MyClass');
+            var instance2 = container.get('MyClass');
+
+            // Assert...
+            assert.ok(instance1 instanceof MyClass);
+            assert.ok(instance2 instanceof MyClass);
+            assert.ok(instance1 !== instance2);
+        });
+
+        it('can be dependency injected into', () => {
+
+            // Arrange...
+            var container = new Container('inject class test');
+            class ClassA {}
+            container.class('ClassA', ClassA);
+
+            // Act...
+            class ClassB {
+                constructor(a = ClassA) {
+                    this.a = a;
+                }
             }
-        }
+            container.class('ClassB', ClassB);
+            const x = container.get('ClassB');
 
-        container.class('ClassB', ClassB);
+            // Assert...
+            assert.ok(x.a instanceof ClassA);
 
-        let x = container.get('ClassB');
+        });
 
-        assert.ok(x.a instanceof ClassA);
+        it('can be a function', () => {
+
+            // Arrange...
+            const c = new Container('c');
+            c.class('funcClass', function () {
+                this.meaningOfLife = 42;
+            });
+
+            // Act...
+            const meaningOfLife = c.callFunction(funcClass => funcClass.meaningOfLife);
+
+            // Assert
+            assert.equal(meaningOfLife, 42, 'Did the class function get constructed?');
+            assert.notEqual(this.meaningOfLife, 42, 'Was it actually newed up?');
+        });
+
+        it('produces new instance of class for separate arguments', () => {
+            const c = new Container('c');
+
+            class MyClass {}
+
+            c.class('myClass', MyClass);
+
+            c.callFunction((a = myClass, b = myClass) => {
+                assert.notEqual(a, b);
+                assert.ok(a instanceof MyClass);
+                assert.ok(b instanceof MyClass);
+            });
+        });
+
     });
 
-    it('can create a singleton', () => {
-        var container = new Container('create singleton test');
+    describe('.singleton', () => {
 
-        class MyClass {}
+        it('can be registered and taken out', () => {
 
-        container.singleton('MyClass', MyClass);
+            // Arrange...
+            var c = new Container('container');
+            let clazz;
+            c.singleton('single', clazz = class {});
 
-        let a = container.get('MyClass');
-        let b = container.get('MyClass');
+            // Act...
+            const a = c.get('single');
+            const b = c.get('single');
 
-        assert.equal(a, b);
+            // Assert...
+            assert.ok(a instanceof clazz);
+            assert.equal(a, b);
+
+        });
+
+        it('can be dependency injected into', () => {
+
+            // Arrange...
+            var c = new Container('container');
+            c.register('hello', () => 'world');
+            class MyClass {
+                constructor(world = hello) {
+                    this.world = world;
+                }
+            };
+
+            // Act...
+            c.singleton('myClass', MyClass);
+
+            // Assert...
+            assert.equal(c.get('myClass').world, 'world');
+        });
+
+        it('is instantiated only once', () => {
+
+            // Arrange...
+            var container = new Container('create singleton test');
+            class MyClass {}
+
+            // Act...
+            container.singleton('myClass', MyClass);
+            const a = container.get('myClass');
+            const b = container.get('myClass');
+            const c = container.callFunction((x = myClass) => x);
+
+            // Assert.
+            assert.equal(a, b);
+            assert.equal(a, c);
+
+        });
+
     });
 
-    it('can inject into a function', () => {
-        let container = new Container('inject function test');
+    describe('.get', () => {
+        it('can get an injectable value', () => {
 
-        class Lol {}
+            // Arrange...
+            var container = new Container('create singleton test');
+            container.constant('x', 10);
 
-        container.class('Lol', Lol);
+            // Act...
+            let x = container.get('x');
 
-        var ran = false;
-        function fn(l = Lol) {
-            ran = true;
+            // Assert.
+            assert.equal(x, 10);
 
-            assert.ok(l instanceof Lol);
-        }
-
-        container.callFunction(fn);
-
-        assert.ok(ran);
+        });
     });
 
-    it('can set the thisArg of a function that is injected into', () => {
-        let container = new Container('set thisArg test');
-        let thisArg = {};
+    describe('.callFunction', () => {
 
-        var ran = false;
-        function fn() {
-            assert.ok(this === thisArg);
-            ran = true;
-        }
+        it('is called with injected parameters', () => {
 
-        container.callFunction(thisArg, fn);
-        assert.ok(ran);
-    });
+            // Arrange...
+            const container = new Container('inject function test');
+            class Lol {}
+            container.class('Lol', Lol);
+            var ran = false;
 
-    it('can be extended by other containers', () => {
-        let containerA = new Container('A');
-        let containerB = new Container('B');
-        let containerC = new Container('C')
-
-        containerB.extend(containerA);
-        containerC.extend(containerB);
-
-        containerA.value('a', 'A');
-        assert.equal(containerC.get('a'), 'A');
-    });
-
-    it('can register providers', () => {
-        let container = new Container('providers test');
-        let something = function () { return 'world'}
-
-        container.value('something', something);
-
-        class MyClass {
-            constructor(str, fn) {
-                this.str = str + ' ' + fn();
+            // Act...
+            function fn(l = Lol) {
+                ran = true;
+                assert.ok(l instanceof Lol);
             }
-        }
+            container.callFunction(fn);
 
-        container.provider('someProvider', (x = something) => {
-            return new MyClass('hello', x);
+            // Assert...
+            assert.ok(ran);
+
         });
 
-        let instance = container.get('someProvider');
+        it('can set the thisArg of a function that is injected into', () => {
 
-        assert.ok(instance.str === 'hello world');
-    });
+            // Arrange...
+            const container = new Container('set thisArg test');
+            const thisArg = {};
+            let ran = false;
+            let gotThisArg;
 
-    it('gets from extended containers in the correct order (newest prioritized)', () => {
-        let a = new Container('a');
-        let b = new Container('b');
-        let c = new Container('c');
+            // Act...
+            function fn() {
+                gotThisArg = this;
+                ran = true;
+            }
+            container.callFunction(thisArg, fn);
 
-        a.value('x', 1);
-        b.value('x', 2);
-
-        c.extend(a);
-        c.extend(b);
-
-        assert.equal(c.get('x'), 2);
-    });
-
-    it('will error if a value was not registered in the container or extended containers', () => {
-        let a = new Container('a');
-        let b = new Container('b');
-        let c = new Container('c');
-
-        b.extend(a);
-        c.extend(b);
-
-        assert.throws(() => c.get('x'), Error);
-    });
-
-    it('can register a function as a class', () => {
-        let c = new Container('c');
-
-        c.class('funcClass', function () {
-            this.meaningOfLife = 42;
+            // Assert
+            assert.equal(thisArg, gotThisArg);
+            assert.ok(ran);
         });
 
-        let meaningOfLife = null;
-        assert.equal(c.callFunction(funcClass => {
-            meaningOfLife = funcClass.meaningOfLife;
-        }));
-
-        assert.equal(meaningOfLife, 42, 'Did the class function get constructed?');
-        assert.notEqual(this.meaningOfLife, 42, 'Was it actually newed up?');
     });
 
-    it('can inject a class multiple times and provide a new instance for each', () => {
-        let c = new Container('c');
+    describe('.instantiate', () => {
+        it('is instantiated with injected parameters', () => {
 
-        class MyClass {}
+            // Arrange...
+            const c = new Container('c');
+            let i = 0;
+            c.provider('count', () => i++);
+            class MyClass {
+                constructor(a = count, count) {
+                    this.first = a;
+                    this.second = count;
+                }
+            }
 
-        c.class('myClass', MyClass);
+            // Act...
+            const instance = c.instantiate(MyClass);
 
-        c.callFunction((a = myClass, b = myClass) => {
-            assert.notEqual(a, b);
-            assert.ok(a instanceof MyClass);
-            assert.ok(b instanceof MyClass);
+            // Assert...
+            assert.equal(instance.first, 0);
+            assert.equal(instance.second, 1);
         });
     });
+
+    describe('.extend', () => {
+
+        it('can extend other containers', () => {
+
+            // Arrange...
+            const containerA = new Container('A');
+            const containerB = new Container('B');
+            const containerC = new Container('C');
+
+            // Act..
+            containerB.extend(containerA);
+            containerC.extend(containerB);
+            containerA.constant('a', 'A');
+
+            // Assert...
+            assert.equal(containerC.get('a'), 'A');
+        });
+
+        it('gets values from last extended container first', () => {
+
+            // Arrange...
+            const a = new Container('a');
+            const b = new Container('b');
+            const c = new Container('c');
+
+            // Act...
+            a.constant('x', 1);
+            b.constant('x', 2);
+            c.extend(a);
+            c.extend(b);
+
+            // Assert...
+            assert.equal(c.get('x'), 2);
+
+        });
+
+        it('throws an error if the value was not found', () => {
+
+            // Arrange...
+            const a = new Container('a');
+            const b = new Container('b');
+            const c = new Container('c');
+            b.extend(a);
+            c.extend(b);
+
+            // Act / assert...
+            assert.throws(() => c.get('x'), Error);
+
+        });
+
+    });
+
 });

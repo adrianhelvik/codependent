@@ -5,193 +5,194 @@ We all know about angular style dependency injection. It is nice and sweet,
 but what if it could be even better? Due to the lazy loading nature of argument
 evaluation with the new ES6 default parameters, it can!
 
+How to create an injection container
+------------------------------------
+
+```javascript
+const Codependent = require('codependent');
+
+// Constructed with an arbitrary container name - used for error messages
+const container = new Codependent('my container');
+```
+
+How to register objects in the container
+----------------------------------------
+
+container.constant(‹name› ‹value›)
+----------------------------------
+Stores the value in the container. That simple
+
+```javascript
+container.constant('hello', 'world');
+
+container.get('hello'); // => 'world'
+```
+
+container.register(‹name›, ‹handler›)
+-------------------------------------
+The handler is a function that is dependecy
+injected. This is useful if you need something
+from the container when creating the object.
+
+```javascript
+container.contant('apiUrl', 'https://path-to-my.api');
+container.register('photosUrl', (apiUrl) => apiUrl + '/photos');
+
+container.get('photosUrl'); // => 'https://path-to-my.api/photos'
+```
+
+container.class(‹name›, ‹class or function›)
+--------------------------------------------
+Creates a new instance of the class every time
+it is injected. In an ES6 class, the constructor
+is injected, in an ES5 class, the function itself
+is injected. Either way it is newed up.
+
+```javascript
+class MyClass {
+    constructor(meaningOfLife) {
+        this.meaningOfLife = meaningOfLife;
+    }
+}
+container.costant('meaningOfLife', 42);
+container.class('myClass', MyClass);
+
+container.get('myClass').meaningOfLife === 42 // => true
+```
+
+container.singleton(‹name›, ‹class or function›)
+------------------------------------------------
+Same as function except that only one instance
+will ever be created (unless the value is redefined
+in the container). Singletons are eagerly
+instantiated, so you must register it in the
+container before its dependencies
+
+```javascript
+container.singleton('myClass', MyClass);
+```
+
+container.provider(‹name›, ‹handler›)
+-------------------------------------
+The handler function is called and injected every
+time you inject the value. The return value of
+the handler is what is injected.
+
+```javascript
+let i = 0;
+container.constant('message', 'hello world');
+container.provider('counter', message => {
+    i += 1;
+    return message + ' ' + i;
+});
+
+container.get('counter'); // => 'hello world 1'
+container.get('counter'); // => 'hello world 2'
+container.get('counter'); // => 'hello world 3'
+// ...
+```
+
+How to create injectable classes, functions and methods
+-------------------------------------------------------
+
+### Default argument
+
+```javascript
+class MyClass {
+    constructor(x = isInjected) {
+    }
+}
+
+function myFunc(x = isInjected) {
+}
+
+let myFunc = (x = isInjected) => {
+}
+
+let myObj = {
+    myMethod(x = isInjected) {
+    }
+}
+
+```
+
+### Angular style
+
+```javascript
+class MyClass {
+    constructor(isInjected) {
+    }
+}
+
+function myFunc(isInjected) {
+}
+
+let myFunc = (isInjected) => {
+}
+
+let myFunc = isInjected => {
+}
+
+let myObj = {
+    myMethod(isInjected) {
+    }
+}
+```
+
+How to inject into a class
+--------------------------
+
+```javascript
+container.instantiate(MyClass);
+```
+
+How to inject into a function
+-----------------------------
+
+```
+container.callFunction(myFunction);
+```
+
 Note
 ----
 This package does not work with older versions of node. You will need
 node/6.0.0 or greater.
 
-Usage examples
---------------
+Extending a Codependent container
+---------------------------------
 
 ```javascript
-// For classes
-class MyClass {
-    constructor(something = someInjectable) {
-    }
-}
+const containerA = new Codependent('A');
+const containerB = new Codependent('B');
 
-// For functions
-function myFunc(something = somethingElse) {
-}
+// let containerB access all
+// values stored in containerA
+containerB.extend(containerA);
 
-// For arrow functions
-let myFunc = thisIsInjected => {
-}
-
-let myFunc = (something = injectedValue) => {
-}
+containerA.contant('greeting', 'Hello world!');
+containerB.get('greeting'); // => 'Hello world'
 ```
 
-.. but what if you prefer shorter angular style injections?
+Recursive injection
+-------------------
 
-```javascript
-class MyClass {
-    constructor(thisIsInjected) {
-    }
-}
-```
+### How it's awesome - simplicity
 
-.. or a combination
+When a class or provider is injected, all of
+its dependencies will themselves be injected.
+Thus it all resolves quite nicely into the
+desired object.
 
-```javascript
-function myFunc(thisIsAlsoInjected, something = andSoIsThis) {
-}
+## How it can be bad - infinite recursion
 
-```
-Extending codependent containers
---------------------------------
+so if module A requires itself or if another
+infinite dependency recursion occurs, it will
+cause the call stack size to be exceeded.
 
-Another handy dandy feature is that the container takes care of
-newing up your classes and its dependencies.. and its
-dependencies.. and so forth. Even if it has to look through
-containers that you extend from! This calls for an example.
+### How it can be remedied
 
-```javascript
-let Codependent = require('codependent');
-
-// 1. First you create a container.
-//    You name it to simplify error
-//    messages for extended containers.
-
-let a = new Codependent('its name');
-
-// 2. Register some values if you please!
-
-a.value('apiUrl', 'https://a-mighty-secure-api.rocks');
-
-class MyClass {
-    constructor(worldsSafestApi = apiUrl) {
-        this.worldsSafestApi = apiUrl;
-    }
-});
-
-a.class('myClass', MyClass);
-
-// 3. Then you create a second container
-//    so that you can see the magic of
-//    container extension.
-
-let b = new Codependent('A very dandy container');
-
-// 4. Then you set b to extend the first container.
-
-b.extend(a);
-
-//    You can extend multiple containers, and the
-//    last registered container will have precedence
-//    over all but the current container.
-//
-//    If you were to change apiUrl in container b,
-//    this would not affect the construction of a
-//    MyClass-instance as the containers simply
-//    query for values from the containers they
-//    extend (through Codependent.prototype.get) if
-//    they don't contain a given value.
-
-// 5. What about wrapping up with a singleton
-//    - The hipster of design patterns?
-
-b.singleton('evergreen', class {
-    constructor(whatevs = myClass) {
-        // whatevs is now a newed up instance of MyClass
-    }
-});
-```
-
-Injectable types
-================
-
-Values
-------
-
-Values are the simplest injectable. You specify a name and a value and
-then it can be injected through the container.
-
-```javascript
-let Codependent = require('codependent');
-let container = new Codependent('some container');
-
-container.value('hello', 'world');
-
-container.callFunction(hello => {
-        console.log(hello); // world
-});
-```
-
-Classes
--------
-
-Classes are newed up whenever they are injected, and its constructor
-is dependency injected. A sweet feature of non-angular style injection
-is that you can inject multiple instances of the same class.
-
-```javascript
-let Codependent = require('codependent');
-let container = new Codependent('some other container');
-
-container.class('myClass', MyClass); // Assumes MyClass is a class
-
-container.callFunction((a = myClass, b = myClass) => {
-    console.log(a instanceof MyClass); // true
-    console.log(b instanceof MyClass); // true
-
-    console.log(a === b); // false
-});
-```
-
-Singletons
-----------
-Singletons are just that. A caveat with singletons at the moment is
-that they are eager instantiated. This means that everything you
-inject into a singleton must be registered beforehand.
-
-```javascript
-let Codependent = require('codependent');
-let container = new Codependent('a singleton container');
-
-class MyClass {}
-
-container.singleton('myClass', MyClass);
-
-container.callFunction((a = myClass, b = myClass) => {
-    console.log(a === b); // true
-});
-
-```
-
-Providers
----------
-Providers are convenient if you want dependecy injection
-when registering any kind of value that shouldn't itself
-be injected.
-
-```javascript
-let Codependent = require('codependent');
-let container = new Codependent('a singleton container');
-
-container.value('config', {
-    'dependency injection': 'is sweet'
-});
-
-container.provider('importantInfo', (isImportant = config) => {
-    let what = Objecy.keys(isImportant)[0];
-
-    return what + ' ' + isImportant[what];
-});
-
-container.get('importantInfo'); // => 'dependency injection is sweet'
-
-```
+Register a value or a provider depending on
+your needs and manually create the object.
 
 How to dependency inject
 ========================
@@ -201,8 +202,9 @@ that are looked up in the injection container and x is a
 variable the injected value is assigned to in the function
 or class constructor.
 
-into a function
----------------
+container.callFunction(‹function›)
+----------------------------------
+Dependency inject the function and call it.
 
 ```javascript
 container.callFunction(function (x = injected, injectedAsWell) {
@@ -210,19 +212,25 @@ container.callFunction(function (x = injected, injectedAsWell) {
 });
 ```
 
-into a class
-------------
+container.instantiate(‹class or function›)
+------------------------------------------
+Dependency inject a class constructor or a function
+and create a new instance.
 
 ```javascript
-container.instantiateClass(class {
+class MyClass {
     constructor(x = injected, injectedAsWell) {
         // ...
     }
-});
+}
+function FnClass(x = injected, injectedAsWell) {}
+
+container.instantiate(MyClass);
+container.instantiate(FnClass);
 ```
 
-Outside a class or function
----------------------------
+container.get(‹name›)
+---------------------
 
 ```javascript
 container.get('injected');
@@ -250,32 +258,4 @@ get-args
 
 * Refactor get-args into separate npm-module.
 * Replace regex with state machine.
-
-Upcoming changes
-================
-
-What will change
-----------------
-
-For v3 I plan on changing the API slightly.
-
-* The provider function will be called every time a provider is injected
-    * So that a provider does what the name indicates
-
-* Values will be created with a function. They will replace the existing providers.
-    * The arrow function syntax is short and sweet, so why not?
-    * Injection will be possible
-    * Example: `container.value('meaningOfLife', () => 42);`
-
-What may change
----------------
-
-* Contant may replace the current value syntax
-    * Example: `container.constant('meaningOfLife', 42);`
-
-* The method callFunction is verbose may be renamed
-    * Possible replacement: fn
-    * Example: `container.fn((x = myInjectable) => { /* ... */ })`
-
-* The method instantiateClass is also verbose
-    * Possible replacement: instantiate or create (not sure yet)
+* Exhaust all possible ways a function/method can be made in es7
