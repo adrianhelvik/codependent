@@ -188,7 +188,7 @@ its dependencies will themselves be injected.
 Thus it all resolves quite nicely into the
 desired object.
 
-## How it can be bad - infinite recursion
+### How it can be bad - infinite recursion
 
 so if module A requires itself or if another
 infinite dependency recursion occurs, it will
