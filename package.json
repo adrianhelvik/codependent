@@ -1,6 +1,6 @@
 {
   "name": "codependent",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Dependency injection container for ES6 and beyond",
   "main": "container.js",
   "repository": {

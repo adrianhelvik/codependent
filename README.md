@@ -5,6 +5,11 @@ We all know about angular style dependency injection. It is nice and sweet,
 but what if it could be even better? Due to the lazy loading nature of argument
 evaluation with the new ES6 default parameters, it can!
 
+Requirements
+------------
+This package does not work with older versions of Node. You will need
+Node/6.0.0 or greater.
+
 How to create an injection container
 ------------------------------------
 
@@ -96,6 +101,10 @@ How to create injectable classes, functions and methods
 -------------------------------------------------------
 
 ### Default argument
+Arguments are lazy loaded, which enables us to inject
+dependencies with this sweet syntax. Admittedly it is
+a hack, so if you're not comfortable with that, use
+angular style injection.
 
 ```javascript
 class MyClass {
@@ -139,24 +148,20 @@ let myObj = {
 }
 ```
 
-How to inject into a class
---------------------------
+How to inject
+-------------
+
+### ... into classes
 
 ```javascript
 container.instantiate(MyClass);
 ```
 
-How to inject into a function
------------------------------
+### ... into functions
 
 ```
 container.callFunction(myFunction);
 ```
-
-Note
-----
-This package does not work with older versions of node. You will need
-node/6.0.0 or greater.
 
 Extending a Codependent container
 ---------------------------------
@@ -231,24 +236,12 @@ container.instantiate(FnClass);
 
 container.get(‹name›)
 ---------------------
+Returns the injectable value. Works just the same as when
+you actually inject the value.
 
 ```javascript
 container.get('injected');
 ```
-
-Testing
-=======
-
-`npm install -g mocha`
-`npm install`
-`npm test`
-
-Not happy with something?
-=========================
-
-Send me a pull request and I will get it sorted out! Tests are mandatory for pull requests.
-The get-args function has tests and is working, but it is ugly and probably has suboptimal
-performance, so I would be happy about pull requests for that one! :)
 
 TODO
 ====
@@ -259,3 +252,20 @@ get-args
 * Refactor get-args into separate npm-module.
 * Replace regex with state machine.
 * Exhaust all possible ways a function/method can be made in es7
+
+Contributer notes
+=================
+
+Testing
+-------
+
+`npm install -g mocha`
+`npm install`
+`npm test`
+
+Not happy with something?
+-------------------------
+
+Send me a pull request and I will get it sorted out! Tests are mandatory for pull requests.
+The get-args function has tests and is working, but it is ugly and probably has suboptimal
+performance, so I would be happy about pull requests for that one! :)
