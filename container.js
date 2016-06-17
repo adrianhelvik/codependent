@@ -202,14 +202,14 @@ class Container {
             return this.instantiate(this.classes[key]);
         } else {
             for (let i = this.parents.length - 1; i >= 0; i--) {
-                const container = this.parents[i];
-                let found = false;
+                const parent = this.parents[i];
+                let found;
 
                 try {
-                    found = container.get(key);
+                    found = parent.get(key);
                 } catch (err) {}
 
-                if (found) {
+                if (found !== undefined) {
                     return found;
                 }
             }

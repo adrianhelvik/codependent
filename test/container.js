@@ -70,6 +70,24 @@ describe('container', () => {
             });
         });
 
+        it('can be fetched from extended containers', () => {
+
+            // Arrange...
+            var a = new Container('container a');
+            var b = new Container('container b');
+            let id = 0;
+            a.provider('incrementing', () => {
+                return id++;
+            });
+
+            // Act...
+            b.extend(a);
+
+            // Assert...
+            assert.equal(b.get('incrementing'), 0); // important: 0 is falsey - caused bug
+            assert.equal(b.get('incrementing'), 1);
+        });
+
     });
 
     describe('.class', () => {
