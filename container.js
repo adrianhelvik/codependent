@@ -11,7 +11,7 @@ class Container {
      */
     constructor(name) {
         if (typeof name !== 'string') {
-            throw Error('Unnamed Container instances not allowed!');
+            throw Error('Unnamed Container instances not allowed! Usage: new Codependent("Any name").');
         }
 
         this.name = name;
