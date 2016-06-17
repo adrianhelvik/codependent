@@ -142,6 +142,21 @@ describe('container', () => {
             });
         });
 
+        it('does not need a constructor', () => {
+            // Arrange...
+            const container = new Container('...');
+            class MyClass {
+                func(a, b, c) {}
+            }
+
+            // Act...
+            container.class('myClass', MyClass);
+
+            // Assert...
+            assert.doesNotThrow(() => {
+                container.get('myClass');
+            });
+        });
     });
 
     describe('.singleton', () => {

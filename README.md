@@ -253,6 +253,12 @@ get-args
 * Replace regex with state machine.
 * Exhaust all possible ways a function/method can be made in es7
 
+Container
+---------
+
+* If an injected class extends another class and has no constructor, the constructor of the extended class should be injected into.
+    * This has some isses that needs to be worked out...
+
 Contributer notes
 =================
 
