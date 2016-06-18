@@ -1,5 +1,5 @@
-Codependent - A dandy dependency injector
-=========================================
+Codependent - A dependency injector
+===================================
 
 We all know about angular style dependency injection. It is nice and sweet,
 but what if it could be even better? Due to the lazy loading nature of argument
