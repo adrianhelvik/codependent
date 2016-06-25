@@ -40,7 +40,7 @@ injected. This is useful if you need something
 from the container when creating the object.
 
 ```javascript
-container.contant('apiUrl', 'https://path-to-my.api');
+container.constant('apiUrl', 'https://path-to-my.api');
 container.register('photosUrl', (apiUrl) => apiUrl + '/photos');
 
 container.get('photosUrl'); // => 'https://path-to-my.api/photos'
@@ -174,7 +174,7 @@ const containerB = new Codependent('B');
 // values stored in containerA
 containerB.extend(containerA);
 
-containerA.contant('greeting', 'Hello world!');
+containerA.constant('greeting', 'Hello world!');
 containerB.get('greeting'); // => 'Hello world'
 ```
 
