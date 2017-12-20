@@ -1,4 +1,4 @@
-Depercation warning
+Deprecation warning
 ===================
 
 This repo will not be maintained. I maintain and use @adrianhelvik/container.
