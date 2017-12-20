@@ -1,3 +1,9 @@
+Depercation warning
+===================
+
+This repo will not be maintained. I maintain and use @adrianhelvik/container.
+The default argument hack does not work in the more recent versions of NodeJS.
+
 Codependent - A dependency injector
 ===================================
 
@@ -101,7 +107,9 @@ How to create injectable classes, functions and methods
 -------------------------------------------------------
 
 ### Default argument
-Arguments are lazy loaded, which enables us to inject
+**Note: This does not work in recent NodeJS versions.**
+
+Arguments are conditionally loaded, which enables us to inject
 dependencies with this sweet syntax. Admittedly it is
 a hack, so if you're not comfortable with that, use
 angular style injection.
